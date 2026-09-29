@@ -91,15 +91,17 @@ Deployment
 The project follows a structured MVC-based architecture that separates application components and improves maintainability.
 
 Main components include:
+
+```text
 app/
- ├── models.py
- ├── prediction_engine.py
- ├── admin/
- ├── auth/
- ├── staff/
- ├── developer/
- ├── visitor/
- ├── models/
+├── models.py
+├── prediction_engine.py
+├── admin/
+├── auth/
+├── staff/
+├── developer/
+├── visitor/
+└── models/
 
 static/
 templates/
@@ -109,6 +111,7 @@ run.py
 requirements.txt
 Dockerfile
 docker-compose.yml
+```
 
 # Running the Project
 
