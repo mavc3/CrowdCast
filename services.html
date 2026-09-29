@@ -1,0 +1,139 @@
+{% extends "staff/staff_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance">
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- Services Registry -->
+        <div class="glass-card" style="padding: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="font-weight: 800; margin: 0;" data-t="service_registry">Service Registry</h3>
+                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;" data-t="total_managed">TOTAL MANAGED: {{ services|length }}</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th data-t="service_name">Service Name</th>
+                        <th data-t="category">Category</th>
+                        <th data-t="stadium">Stadium</th>
+                        <th data-t="capacity">Capacity</th>
+                        <th data-t="status">Status</th>
+                        <th data-t="actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td style="font-weight: 700;">{{ service.name }}</td>
+                        <td>{{ service.type }}</td>
+                        <td>{{ service.stadium.name }}</td>
+                        <td>{{ service.capacity }}</td>
+                        <td>
+                            <form action="{{ url_for('staff.edit_service', id=service.id) }}" method="POST" style="display: inline;">
+                                <input type="hidden" name="capacity" value="{{ service.capacity }}">
+                                <select name="status" onchange="this.form.submit()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 20px; width: auto; background: {% if service.status == 'Open' %}rgba(16, 185, 129, 0.1){% else %}rgba(255, 77, 77, 0.1){% endif %}; color: {% if service.status == 'Open' %}#10b981{% else %}#ff4d4d{% endif %}; font-weight: 800; border: none;">
+                                    <option value="Open" {% if service.status == 'Open' %}selected{% endif %} data-t="OPEN">Open</option>
+                                    <option value="Closed" {% if service.status == 'Closed' %}selected{% endif %} data-t="CLOSED">Closed</option>
+                                    <option value="Busy" {% if service.status == 'Busy' %}selected{% endif %} data-t="BUSY">Busy</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="openEditModal('{{ service.id }}', '{{ service.name }}', '{{ service.capacity }}')" class="btn" style="background: rgba(0, 51, 102, 0.05); color: var(--primary); padding: 8px;"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <form action="{{ url_for('staff.delete_service', id=service.id) }}" method="POST" onsubmit="return confirm('Archive this service record?')">
+                                    <button type="submit" class="btn" style="background: rgba(255, 77, 77, 0.05); color: #ff4d4d; padding: 8px;"><i class="fa-solid fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Initialization Hub -->
+        <div class="glass-card" style="padding: 2.5rem; height: fit-content; position: sticky; top: 120px;">
+            <h3 style="font-weight: 800; margin-bottom: 2rem;" data-t="add_service">Initialize Service</h3>
+            <form action="{{ url_for('staff.add_service') }}" method="POST">
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="service_name">Service Name</label>
+                    <input type="text" name="service_name" placeholder="e.g. North Gate Cafe" required data-t-p="search_services">
+                </div>
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="category">Category</label>
+                    <select name="category" required>
+                        <option value="Restaurant" data-t="opt_restaurant">Restaurant</option>
+                        <option value="Cafe" data-t="opt_cafe">Cafe</option>
+                        <option value="Retail">Retail</option>
+                        <option value="Information">Information</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="stadium">Stadium Venue</label>
+                    <select name="stadium_id" required>
+                        {% for stadium in stadiums %}
+                        <option value="{{ stadium.id }}">{{ stadium.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="capacity">Operational Capacity</label>
+                    <input type="number" name="capacity" placeholder="e.g. 500" required>
+                </div>
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="location_desc">Location Description</label>
+                    <input type="text" name="location_description" placeholder="e.g. Level 2, Section A">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; justify-content: center;">
+                    <i class="fa-solid fa-plus-circle"></i> <span data-t="btn_create">Establish Unit</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <div class="glass-card animate-entrance" style="width: 400px; padding: 2.5rem; background: white;">
+        <h3 id="modalTitle" style="font-weight: 800; margin-bottom: 1.5rem;" data-t="update_ops_data">Edit Service</h3>
+        <form id="editForm" method="POST">
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="capacity">Operational Capacity</label>
+                <input type="number" name="capacity" id="modalCapacity" required>
+            </div>
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="status">Status</label>
+                <select name="status" id="modalStatus">
+                    <option value="Open" data-t="OPEN">Open</option>
+                    <option value="Closed" data-t="CLOSED">Closed</option>
+                    <option value="Busy" data-t="BUSY">Busy</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="button" onclick="closeEditModal()" class="btn btn-outline" style="flex: 1; justify-content: center;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="flex: 2; justify-content: center;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openEditModal(id, name, capacity) {
+    const modal = document.getElementById('editModal');
+    const form = document.getElementById('editForm');
+    const title = document.getElementById('modalTitle');
+    const capInput = document.getElementById('modalCapacity');
+    
+    form.action = `/staff/service/edit/${id}`;
+    title.innerText = `Edit: ${name}`;
+    capInput.value = capacity;
+    
+    modal.style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+</script>
+{% endblock %}

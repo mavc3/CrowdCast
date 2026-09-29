@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block nav %}
+<div class="glass-nav" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="{{ url_for('auth.index') }}" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CrowdCast Logo" style="height: 56px;">
+            <h1 style="font-size: 1.2rem; font-weight: 800; color: var(--primary); margin: 0;">2034 <span style="color: #64748b; font-weight: 600;">CROWDCAST</span></h1>
+        </a>
+        
+        <nav style="display: flex; gap: 0.5rem;">
+            <a href="{{ url_for('visitor.dashboard') }}" class="nav-item" style="padding: 8px 16px; border-radius: 8px; text-decoration: none; color: #334155; font-weight: 700; font-size: 0.95rem; transition: 0.2s;" data-t="nav_dash">My Account</a>
+            <a href="{{ url_for('visitor.search') }}" class="nav-item" style="padding: 8px 16px; border-radius: 8px; text-decoration: none; color: #334155; font-weight: 700; font-size: 0.95rem; transition: 0.2s;" data-t="nav_search">Quick Search</a>
+        </nav>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <button onclick="toggleLanguage()" class="btn btn-secondary" style="height: 36px; padding: 0 16px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: var(--primary); border: none;">
+            <i class="fa-solid fa-earth-americas" style="margin-inline-end: 6px;"></i> <span id="lang-label">عربي</span>
+        </button>
+        
+        <div style="height: 20px; width: 1px; background: #cbd5e1;"></div>
+        
+        <div style="text-align: right;">
+            <div style="font-size: 0.9rem; font-weight: 800; color: var(--primary);">{{ current_user.name }}</div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: #10b981;" data-t-dynamic="FAN">FAN ACCOUNT</div>
+        </div>
+        
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary" style="width: 36px; height: 36px; padding: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ef4444; background: #fef2f2; border: none;" title="Logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="visitor-wrapper" style="padding: 2rem; max-width: 1400px; margin: 0 auto;">
+    {% block visitor_content %}{% endblock %}
+</div>
+{% endblock %}

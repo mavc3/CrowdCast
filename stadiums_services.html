@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Stadium Governance Section -->
+    <div class="glass-card">
+        <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--primary);">
+            <i class="fa-solid fa-building-columns" style="margin-right: 10px;"></i>
+            <span data-t="nav_stadiums">Stadium Governance</span>
+        </h3>
+        
+        <form action="{{ url_for('admin.stadiums_services') }}" method="POST" style="margin-bottom: 2rem; background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;" data-t="stadium_name">Stadium Name</label>
+                    <input type="text" name="name" placeholder="E.g. Al-Awwal Park" required>
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;" data-t="location">Location</label>
+                    <input type="text" name="location" placeholder="Riyadh, KSA" required>
+                </div>
+            </div>
+            <label style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-top: 10px; display: block;" data-t="capacity">Total Capacity</label>
+            <input type="number" name="capacity" placeholder="25000" required>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;" data-t="btn_upload">Register Venue</button>
+        </form>
+
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-t="stadium_name">Name</th>
+                        <th data-t="capacity">Capacity</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in stadiums %}
+                    <tr>
+                        <td style="font-weight: 700;">{{ s.name }}</td>
+                        <td>{{ s.capacity | int | format }}</td>
+                        <td style="text-align: right;">
+                             <form action="{{ url_for('admin.stadiums_services') }}" method="POST" style="display:inline;">
+                                <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                             </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Service Mapping Section -->
+    <div class="glass-card">
+        <h3 style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--primary);">
+            <i class="fa-solid fa-utensils" style="margin-right: 10px;"></i>
+            <span data-t="nav_services">Service Mapping</span>
+        </h3>
+
+        <form action="{{ url_for('admin.stadiums_services') }}" method="POST" style="margin-bottom: 2rem; background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;" data-t="service_name">Service Name</label>
+                    <input type="text" name="name" placeholder="E.g. North Gate Cafe" required>
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;" data-t="category">Category</label>
+                    <select name="type">
+                        <option value="restaurant" data-t="opt_restaurant">Restaurant</option>
+                        <option value="cafe" data-t="opt_cafe">Cafe</option>
+                        <option value="fast_food">Fast Food</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;" data-t="stadium">Venue</label>
+                    <select name="stadium_id">
+                        {% for s in stadiums %}
+                        <option value="{{ s.id }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; font-weight: 700; color: #64748b;" data-t="capacity">Service Capacity</label>
+                    <input type="number" name="capacity" placeholder="100" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;" data-t="btn_upload">Map Service</button>
+        </form>
+
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-t="service_name">Service</th>
+                        <th data-t="stadium">Venue</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for svc in services %}
+                    <tr>
+                        <td style="font-weight: 700;">{{ svc.name }}</td>
+                        <td style="font-size: 0.8rem; opacity: 0.7;">{{ svc.stadium.name }}</td>
+                        <td style="text-align: right;">
+                             <form action="{{ url_for('admin.stadiums_services') }}" method="POST" style="display:inline;">
+                                <button type="submit" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+                             </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('nav-stadiums-services').classList.add('active');
+    document.getElementById('page-title').innerText = "Stadiums & Services Governance";
+</script>
+{% endblock %}

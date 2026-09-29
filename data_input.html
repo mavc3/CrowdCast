@@ -1,0 +1,73 @@
+{% extends "staff/staff_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance" style="max-width: 900px; margin: 0 auto;">
+    <div class="glass-card" style="padding: 3rem; margin-bottom: 2rem; border-inline-start: 6px solid var(--accent);">
+        <h3 style="font-weight: 800; margin-bottom: 2rem;" data-t="telemetry_ingestion">Operational Telemetry Ingestion</h3>
+        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 2.5rem;" data-t="data_input_desc">
+            Submit real-time service metrics to calibrate the prediction engine. High-fidelity data ensures optimal route guidance and crowd distribution.
+        </p>
+
+        <form action="{{ url_for('staff.data_input') }}" method="POST">
+            <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-bottom: 2rem;">
+                <!-- Service Selection -->
+                <div style="grid-column: span 2;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;" data-t="selection_service">Target Operational Unit</label>
+                    <select name="service_id" required style="height: 54px;">
+                        {% for service in services %}
+                        <option value="{{ service.id }}">{{ service.name }} ({{ service.stadium.name }}) - Max: {{ service.capacity }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Waiting Time -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;" data-t="waiting_time">Waiting Time (Minutes)</label>
+                    <div style="position: relative;">
+                        <input type="number" name="waiting_time" min="0" max="300" placeholder="0 - 300" required style="padding-inline-end: 4rem;">
+                        <span style="position: absolute; inset-inline-end: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 0.8rem; font-weight: 800; opacity: 0.4;">MIN</span>
+                    </div>
+                </div>
+
+                <!-- Current Capacity -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;" data-t="current_occupancy">Current Occupancy</label>
+                    <div style="position: relative;">
+                        <input type="number" name="current_capacity" placeholder="Active Visitors" required style="padding-inline-end: 4rem;">
+                        <i class="fa-solid fa-users" style="position: absolute; inset-inline-end: 1.5rem; top: 50%; transform: translateY(-50%); opacity: 0.4;"></i>
+                    </div>
+                </div>
+
+                <!-- Availability -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;" data-t="status_broadcast">Availability Broadcast</label>
+                    <select name="availability_status" required>
+                        <option value="Available" data-t="AVAILABLE">Available</option>
+                        <option value="Busy" data-t="BUSY">Busy</option>
+                        <option value="Closed" data-t="CLOSED">Closed</option>
+                    </select>
+                </div>
+
+                <!-- Notes -->
+                <div style="grid-column: span 2;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase;" data-t="notes">Operational Notes (Optional)</label>
+                    <textarea name="notes" placeholder="e.g. Temporary delay due to maintenance..." style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; height: 100px; font-family: inherit; font-size: 0.9rem;" data-t-p="notes"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 60px; justify-content: center; font-size: 1.1rem; border-radius: 16px; background: var(--grad-primary);">
+                <i class="fa-solid fa-bolt-lightning"></i> <span data-t="btn_ingest">Ingest Telemetry Data</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Integrity Rules -->
+    <div class="glass-card" style="padding: 2rem; background: rgba(0, 51, 102, 0.02); border: 1px dashed var(--border);">
+        <h4 style="font-weight: 800; margin-bottom: 1rem; font-size: 0.85rem; opacity: 0.6; text-transform: uppercase;" data-t="integrity_check">System Integrity Check</h4>
+        <ul style="font-size: 0.85rem; color: #64748b; padding-inline-start: 1rem; line-height: 1.8;">
+            <li data-t="rule1">Waiting time must be within logical operational range (0-300 min).</li>
+            <li data-t="rule2">Occupancy cannot exceed established service capacity limits.</li>
+            <li data-t="rule3">All submissions are archived in the System Audit Log.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "dev/dev_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance">
+    <div class="glass-card" style="padding: 3rem; border-inline-start: 6px solid #6366f1; margin-bottom: 2rem;">
+        <h3 style="font-weight: 800; margin-bottom: 2.5rem;" data-t="nav_monitor">System Diagnostic Health</h3>
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+            <div style="background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem;">
+                <i class="fa-solid fa-microchip" style="font-size: 2rem; color: #6366f1;"></i>
+                <div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">CPU Architectures</div>
+                    <div style="font-size: 1.1rem; font-weight: 800;">{{ telemetry.cpu_core_count }} Cores @ {{ telemetry.cpu_freq }} MHz</div>
+                </div>
+            </div>
+            <div style="background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem;">
+                <i class="fa-solid fa-server" style="font-size: 2rem; color: #a855f7;"></i>
+                <div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Allocated Memory</div>
+                    <div style="font-size: 1.1rem; font-weight: 800;">{{ telemetry.mem_total }} GB Integrated</div>
+                </div>
+            </div>
+            <div style="background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem;">
+                <i class="fa-solid fa-hard-drive" style="font-size: 2rem; color: var(--accent);"></i>
+                <div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Storage Persistence</div>
+                    <div style="font-size: 1.1rem; font-weight: 800;">{{ telemetry.disk_usage }}% Utilization</div>
+                </div>
+            </div>
+            <div style="background: rgba(0,0,0,0.02); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem;">
+                <i class="fa-solid fa-clock-rotate-left" style="font-size: 2rem; color: #64748b;"></i>
+                <div>
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase;">System Uptime</div>
+                    <div style="font-size: 1.1rem; font-weight: 800;">Since {{ telemetry.boot_time }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

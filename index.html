@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="animate-entrance" style="max-width: 1200px; margin: 4rem auto; padding: 0 2rem;">
+    <!-- Strategic Hero -->
+    <div style="text-align: center; margin-bottom: 5rem;">
+
+        <h1 class="hero-text" style="font-size: 4.5rem; margin-top: 1rem; margin-bottom: 1.5rem;" data-t="hero_title">CROWDCAST 2034</h1>
+        <p style="font-size: 1.25rem; color: #64748b; max-width: 700px; margin: 0 auto; line-height: 1.6;" data-t="hero_desc">
+            The unified command center for predictive crowd intelligence, operational governance, and sub-second operational telemetry.
+        </p>
+    </div>
+
+    <!-- Strategic Gateways -->
+    <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+        <!-- Fan Path -->
+        <div class="glass-portal" style="padding: 3rem; border-top: 6px solid var(--accent);">
+            <div style="width: 60px; height: 60px; background: rgba(0, 212, 255, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                <i class="fa-solid fa-users-viewfinder" style="font-size: 1.5rem; color: var(--accent);"></i>
+            </div>
+            <h2 style="font-weight: 800; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem;" data-t="visitor_title">Visitor / Fan</h2>
+            <p style="color: #64748b; margin-bottom: 2.5rem; min-height: 3rem;" data-t="visitor_desc">Navigate match day with real-time AI guidance. Avoid queues and reach your seat with maximum efficiency.</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{{ url_for('auth.signup_visitor') }}" class="btn btn-primary">
+                    <span data-t="btn_get_started">Get Started</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline" style="border-radius: 40px;" data-t="login">Login</a>
+            </div>
+        </div>
+
+        <!-- Staff Path -->
+        <div class="glass-portal" style="padding: 3rem; border-top: 6px solid var(--grad-emerald);">
+            <div style="width: 60px; height: 60px; background: rgba(16, 185, 129, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                <i class="fa-solid fa-user-tie" style="font-size: 1.5rem; color: #10b981;"></i>
+            </div>
+            <h2 style="font-weight: 800; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem;" data-t="staff_title">Staff / Manager</h2>
+            <p style="color: #64748b; margin-bottom: 2.5rem; min-height: 3rem;" data-t="staff_desc">Operational oversight and resource optimization. Manage your sector using live demand predictive analytics.</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{{ url_for('auth.signup_staff') }}" class="btn" style="background: var(--grad-emerald); color: white;">
+                    <span data-t="btn_access">Access Console</span>
+                    <i class="fa-solid fa-bolt"></i>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline" style="border-radius: 40px;" data-t="login">Login</a>
+            </div>
+        </div>
+
+        <!-- Developer Path -->
+        <div class="glass-portal" style="padding: 3rem; border-top: 6px solid #6366f1;">
+            <div style="width: 60px; height: 60px; background: rgba(99, 102, 241, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                <i class="fa-solid fa-code" style="font-size: 1.5rem; color: #6366f1;"></i>
+            </div>
+            <h2 style="font-weight: 800; font-size: 1.5rem; color: var(--primary); margin-bottom: 1rem;" data-t="dev_title">Network Developer</h2>
+            <p style="color: #64748b; margin-bottom: 2.5rem; min-height: 3rem;" data-t="dev_desc">Model governance and telemetry traces. Monitor Neural Link health and system integrity metrics.</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{{ url_for('auth.signup_developer') }}" class="btn" style="background: #6366f1; color: white;">
+                    <span data-t="btn_explore">Explore Traces</span>
+                    <i class="fa-solid fa-microchip"></i>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline" style="border-radius: 40px;" data-t="login">Login</a>
+            </div>
+        </div>
+
+        <!-- Admin Gateway -->
+        <div class="glass-portal" style="padding: 3rem; border-top: 6px solid var(--primary); background: var(--grad-primary); color: white;">
+            <div style="width: 60px; height: 64px; background: rgba(255, 255, 255, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+                <i class="fa-solid fa-shield-halved" style="font-size: 1.5rem; color: white;"></i>
+            </div>
+            <h2 style="font-weight: 800; font-size: 1.5rem; color: white; margin-bottom: 1rem;" data-t="admin_title">Administrator</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 2.5rem; min-height: 3rem;" data-t="admin_desc">Strategic Command & Control. Full system orchestration and real-time operational oversight.</p>
+            <a href="{{ url_for('auth.login') }}" class="btn" style="background: white; color: var(--primary); width: 100%; justify-content: center;">
+                <span data-t="btn_enter">Enter Command Center</span>
+                <i class="fa-solid fa-door-open"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

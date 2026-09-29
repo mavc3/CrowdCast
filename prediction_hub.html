@@ -1,0 +1,137 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<!-- Prediction Matrix & Hub Header -->
+<div class="glass-card" style="margin-bottom: 2rem; border-left: 5px solid var(--primary); padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="font-weight: 800; color: var(--primary);" data-t="nav_prediction_hub">Prediction Management Hub</h2>
+            <p style="opacity: 0.6; font-size: 0.9rem;">Unified control for data ingestion, autonomic inference, and result matrices.</p>
+        </div>
+        <form action="{{ url_for('admin.prediction_hub') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center; background: #f8fafc; padding: 10px 20px; border-radius: 40px; border: 1px solid var(--border);">
+            <label for="dataset-upload" style="cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--primary); font-weight: 700; font-size: 0.85rem;">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span data-t="btn_upload">Ingest New Dataset</span>
+            </label>
+            <input id="dataset-upload" type="file" name="dataset" style="display: none;" onchange="this.form.submit()">
+        </form>
+    </div>
+</div>
+
+<div class="grid" style="grid-template-columns: 1fr 2fr; gap: 2.5rem;">
+    <!-- Batch Lifecycle Control -->
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--primary);">
+            <i class="fa-solid fa-microchip"></i>
+            <span data-t="nav_control">Lifecycle Execution</span>
+        </h3>
+        
+        <div style="max-height: 500px; overflow-y: auto;">
+            {% for batch in batches.items %}
+            <div style="background: #fdfdfd; padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; position: relative; transition: all 0.3s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                        <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; letter-spacing: 1px;">BATCH #{{ batch.id }}</div>
+                        <div style="font-size: 0.7rem; opacity: 0.6;">{{ batch.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                    <span style="font-size: 0.6rem; padding: 4px 10px; border-radius: 20px; font-weight: 800; 
+                        {% if batch.status == 'Completed' %} background: #dcfce7; color: #166534;
+                        {% elif batch.status == 'Processing' %} background: #fef9c3; color: #854d0e;
+                        {% else %} background: #fee2e2; color: #991b1b; {% endif %}">
+                        {{ batch.status | upper }}
+                    </span>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div>
+                        <div style="font-size: 0.6rem; opacity: 0.5;">RECORDS</div>
+                        <div style="font-weight: 800; color: var(--primary);">{{ batch.records_count or 0 }}</div>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('admin.prediction_hub') }}" method="POST" style="margin-top: 15px;">
+                    <button type="submit" class="btn btn-primary" style="font-size: 0.7rem; padding: 6px 15px; width: 100%;" {% if batch.status == 'Completed' %} disabled style="opacity:0.5; cursor:not-allowed;" {% endif %}>
+                        <i class="fa-solid fa-play" style="margin-right: 5px;"></i> RE-EXECUTE INFERENCE
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Batch Pagination -->
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 1.5rem;">
+            {% if batches.has_prev %}
+                <a href="{{ url_for('admin.prediction_hub', batch_page=batches.prev_num, result_page=results.page) }}" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.7rem;"><i class="fa-solid fa-chevron-left"></i></a>
+            {% endif %}
+            <span style="font-size: 0.7rem; font-weight: 800; opacity: 0.5; display: flex; align-items: center;">{{ batches.page }} / {{ batches.pages }}</span>
+            {% if batches.has_next %}
+                <a href="{{ url_for('admin.prediction_hub', batch_page=batches.next_num, result_page=results.page) }}" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.7rem;"><i class="fa-solid fa-chevron-right"></i></a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prediction Results Matrix -->
+    <div class="glass-card">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--primary);">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span data-t="nav_results">Projection Matrix</span>
+        </h3>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-t="timestamp">Timestamp</th>
+                        <th data-t="stadium">Venue</th>
+                        <th data-t="service_name">Service</th>
+                        <th>Visitors</th>
+                        <th data-t="status">Demand</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results.items %}
+                    <tr>
+                        <td style="font-size: 0.8rem; opacity: 0.6;">{{ r.timestamp.strftime('%H:%M') }}</td>
+                        <td style="font-weight: 700;">{{ r.service.stadium.name }}</td>
+                        <td>{{ r.service.name }}</td>
+                        <td style="font-weight: 800; color: var(--primary);">{{ r.expected_visitors }}</td>
+                        <td>
+                            <span style="font-weight: 700; font-size: 0.75rem; 
+                                {% if r.demand_level == 'High' %} color: #ef4444; 
+                                {% elif r.demand_level == 'Medium' %} color: #f59e0b;
+                                {% else %} color: #10b981; {% endif %}">
+                                {{ r.demand_level | upper }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Matrix Pagination -->
+        <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8fafc; border-radius: 12px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #64748b;">
+                Page {{ results.page }} of {{ results.pages }}
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                {% if results.has_prev %}
+                    <a href="{{ url_for('admin.prediction_hub', result_page=results.prev_num, batch_page=batches.page) }}" class="btn btn-outline" style="font-size: 0.75rem; padding: 6px 15px;">
+                        <i class="fa-solid fa-chevron-left"></i> Previous
+                    </a>
+                {% endif %}
+                {% if results.has_next %}
+                    <a href="{{ url_for('admin.prediction_hub', result_page=results.next_num, batch_page=batches.page) }}" class="btn btn-primary" style="font-size: 0.75rem; padding: 6px 15px;">
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('nav-prediction').classList.add('active');
+    document.getElementById('page-title').innerText = "Strategic Prediction Management Hub";
+</script>
+{% endblock %}

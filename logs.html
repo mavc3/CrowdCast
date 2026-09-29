@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+{% block admin_content %}
+<div class="glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <h3><i class="fa-solid fa-terminal" style="color: var(--primary); margin-right: 10px;"></i> <span data-t="nav_logs">Audit Trail</span></h3>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th data-t="id">Trace ID</th>
+                    <th data-t="timestamp">Timestamp</th>
+                    <th data-t="operator">Identity</th>
+                    <th data-t="action">Action</th>
+                    <th data-t="status">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs.items %}
+                <tr>
+                    <td>0x{{ log.id }}FF</td>
+                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ log.user.name if log.user else 'SYSTEM' }}</td>
+                    <td>{{ log.action_type }}</td>
+                    <td>SUCCESS</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8fafc; border-radius: 12px;">
+        <div style="font-size: 0.85rem; color: #64748b; font-weight: 700;">
+            <span data-t="page">Page</span> {{ logs.page }} <span data-t="of">of</span> {{ logs.pages }}
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            {% if logs.has_prev %}
+                <a href="{{ url_for('admin.system_logs', page=logs.prev_num) }}" class="btn btn-outline" style="padding: 6px 15px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-chevron-left"></i> <span data-t="prev">Previous</span>
+                </a>
+            {% endif %}
+            
+            {% if logs.has_next %}
+                <a href="{{ url_for('admin.system_logs', page=logs.next_num) }}" class="btn btn-primary" style="padding: 6px 15px; font-size: 0.8rem;">
+                    <span data-t="next">Next</span> <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('nav-logs').classList.add('active');
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="animate-entrance" style="min-height: calc(100vh - 120px); display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div style="width: 100%; max-width: 600px; padding: 3rem; background: white; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05);">
+        
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <div style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i class="fa-solid fa-calendar-check" style="font-size: 2rem; color: #10b981;"></i>
+            </div>
+            <h2 style="font-weight: 800; font-size: 2rem; color: var(--primary); letter-spacing: -1px; margin-bottom: 0.5rem;" data-t="visitor_search">Visitor Intelligence Portal</h2>
+            <p style="color: #64748b; font-size: 1.05rem;" data-t="plan_day">Optimize your match day experience with real-time crowd predictions.</p>
+        </div>
+
+        <form action="{{ url_for('visitor.results') }}" method="GET" id="search-form">
+            <!-- Stadium Selection -->
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;" data-t="stadium_scope">Strategic Venue Scope</label>
+                <div style="position: relative;">
+                    <select name="stadium_id" id="stadium-select" required style="width: 100%; height: 60px; padding: 0 1.5rem; border: 1px solid var(--border); border-radius: 14px; font-weight: 600; font-size: 1rem; background: #f8fafc; cursor: pointer; appearance: none;">
+                        <option value="" disabled selected data-t="p_stadium">Select Global Venue</option>
+                        {% for st in stadiums %}
+                            <option value="{{ st.id }}">{{ st.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <i class="fa-solid fa-chevron-down" style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: #94a3b8;"></i>
+                </div>
+            </div>
+
+            <!-- Service Selection -->
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;" data-t="service_focus">Service Operational Unit</label>
+                <div style="position: relative;">
+                    <select name="service_id" id="service-select" disabled required style="width: 100%; height: 60px; padding: 0 1.5rem; border: 1px solid var(--border); border-radius: 14px; font-weight: 600; font-size: 1rem; background: #f1f5f9; cursor: not-allowed; appearance: none;">
+                        <option value="" disabled selected data-t="p_service">Select Operational Service</option>
+                    </select>
+                    <i class="fa-solid fa-loader fa-spin" id="service-loader" style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); display: none; color: var(--primary);"></i>
+                    <i class="fa-solid fa-chevron-down" id="service-chevron" style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: #94a3b8;"></i>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 3rem;">
+                <!-- Date Picker -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;" data-t="date">Chronological Date</label>
+                    <input type="date" name="date" value="{{ today }}" style="width: 100%; height: 60px; padding: 0 1.25rem; border: 1px solid var(--border); border-radius: 14px; font-weight: 600; background: #f8fafc; margin: 0;">
+                </div>
+                <!-- Hour Selector -->
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;" data-t="hour">Temporal Hour</label>
+                    <select name="hour" style="width: 100%; height: 60px; padding: 0 1.25rem; border: 1px solid var(--border); border-radius: 14px; font-weight: 600; background: #f8fafc;">
+                        {% for h in range(24) %}
+                            <option value="{{ h }}" {% if h == current_hour %}selected{% endif %}>{{ "%02d:00"|format(h) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 64px; justify-content: center; font-size: 1.1rem; border-radius: 16px; background: var(--grad-primary); box-shadow: 0 10px 30px rgba(0, 51, 102, 0.2);">
+                <span data-t="btn_search">Initiate Search</span>
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stadiumSelect = document.getElementById('stadium-select');
+    const serviceSelect = document.getElementById('service-select');
+    const serviceLoader = document.getElementById('service-loader');
+    const serviceChevron = document.getElementById('service-chevron');
+
+    stadiumSelect.addEventListener('change', async function() {
+        const stadiumId = this.value;
+        if (!stadiumId) return;
+
+        // Reset and show loading
+        serviceSelect.disabled = true;
+        serviceSelect.style.background = '#f1f5f9';
+        serviceSelect.style.cursor = 'wait';
+        serviceLoader.style.display = 'block';
+        serviceChevron.style.display = 'none';
+        
+        const syncingText = translations[localStorage.getItem('crowdcast_lang') || 'en']['syncing_telemetry'];
+        serviceSelect.innerHTML = `<option value="" disabled selected>${syncingText}</option>`;
+
+        try {
+            const response = await fetch(`/visitor/get-services/${stadiumId}`);
+            const services = await response.json();
+
+            serviceSelect.innerHTML = '';
+            
+            if (services.length > 0) {
+                services.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.id;
+                    option.textContent = s.name;
+                    serviceSelect.appendChild(option);
+                });
+                serviceSelect.disabled = false;
+                serviceSelect.style.background = '#f8fafc';
+                serviceSelect.style.cursor = 'pointer';
+            } else {
+                const option = document.createElement('option');
+                option.value = "";
+                option.disabled = true;
+                option.selected = true;
+                option.setAttribute('data-t', 'no_localized_services');
+                serviceSelect.appendChild(option);
+                serviceSelect.disabled = true;
+            }
+        } catch (error) {
+            console.error('Linguistic Engine Sync Error:', error);
+        } finally {
+            serviceLoader.style.display = 'none';
+            serviceChevron.style.display = 'block';
+            // Re-apply language translations for new elements
+            if (typeof applyLanguage === 'function') {
+                applyLanguage(localStorage.getItem('crowdcast_lang') || 'en');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "dev/dev_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance">
+    <div class="glass-card" style="padding: 2.5rem; margin-bottom: 2rem; border-inline-start: 6px solid #a855f7;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 style="font-weight: 800; margin: 0;" data-t="nav_models">Model Registry</h3>
+            <span style="font-size: 0.7rem; font-weight: 900; color: #10b981;"><i class="fa-solid fa-microchip"></i> ACTIVE_MEMORY_SESSIONS: {{ registry|length }}</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th data-t="model_name">Model Identity</th>
+                    <th data-t="type">Type</th>
+                    <th data-t="version">Version</th>
+                    <th data-t="status">Status</th>
+                    <th data-t="loaded_at">Loaded At</th>
+                    <th data-t="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model in registry %}
+                <tr>
+                    <td style="font-weight: 800; color: #050a10;">{{ model.model_name }}</td>
+                    <td>{{ model.model_type }}</td>
+                    <td><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ model.version }}</code></td>
+                    <td>
+                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 900; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            {{ model.status }}
+                        </span>
+                    </td>
+                    <td style="font-size: 0.8rem; opacity: 0.6;">{{ model.loaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <form action="{{ url_for('developer.test_model', id=model.id) }}" method="POST" style="margin: 0;">
+                                <button type="submit" class="btn" style="background: rgba(99, 102, 241, 0.1); color: #6366f1; padding: 4px 12px; min-height: 30px; font-size: 0.75rem;">Test</button>
+                            </form>
+                            <form action="{{ url_for('developer.delete_model', id=model.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to remove this model from the active registry?');">
+                                <button type="submit" class="btn" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e; padding: 4px 12px; min-height: 30px; font-size: 0.75rem;">Drop</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

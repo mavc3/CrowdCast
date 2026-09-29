@@ -1,0 +1,365 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<div class="soc-container" style="padding-top: 1.5rem; background: #f8fafc; min-height: 100vh;">
+    <!-- Strategic Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: white; padding: 1.5rem 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <div>
+            <h1 style="font-weight: 800; font-size: 1.8rem; color: var(--primary);" data-t="dashboard_title">Strategic Command Center</h1>
+            <p style="color: #64748b; font-size: 0.9rem;" data-t="dashboard_desc">Real-time AI operational intelligence overview.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+             <span id="conn-status" style="font-size: 0.65rem; font-weight: 800; background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 8px; font-family: 'JetBrains Mono';">CONNECTING...</span>
+             <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 10px 24px; border-radius: 40px; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulse 1.5s infinite;"></div>
+                <span data-t="sys_live">LIVE SYSTEM ACTIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI GRID -->
+    <div class="grid" style="grid-template-columns: repeat(5, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+        <div class="glass-card stat-card" style="border-bottom: 4px solid var(--primary); background: white;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px;" data-t="total_predictions">Total Predictions</div>
+            <div id="kpi-preds" class="stat-val" style="margin-top: 10px; font-size: 2rem; color: var(--primary);">{{ stats.predictions }}</div>
+        </div>
+        <div class="glass-card stat-card" style="border-bottom: 4px solid #10b981; background: white;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px;" data-t="total_stadiums">Managed Stadiums</div>
+            <div class="stat-val" style="margin-top: 10px; font-size: 2rem; color: #10b981;">{{ stats.stadiums }}</div>
+        </div>
+        <div class="glass-card stat-card" style="border-bottom: 4px solid var(--accent); background: white;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px;" data-t="total_services">Service Nodes</div>
+            <div class="stat-val" style="margin-top: 10px; font-size: 2rem; color: var(--accent);">{{ stats.services }}</div>
+        </div>
+        <div class="glass-card stat-card" style="border-bottom: 4px solid #6366f1; background: white;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px;" data-t="total_users">System Users</div>
+            <div class="stat-val" style="margin-top: 10px; font-size: 2rem; color: #6366f1;">{{ stats.users }}</div>
+        </div>
+        <div class="glass-card stat-card" style="border-bottom: 4px solid #f59e0b; background: white;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px;" data-t="public_audience">Public Audience</div>
+            <div id="kpi-visitors" class="stat-val" style="margin-top: 10px; font-size: 2rem; color: #f59e0b;">{{ stats.visitors }}</div>
+        </div>
+    </div>
+
+    <!-- MAIN ROW -->
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Velocity Analytics -->
+        <div class="glass-card" style="background: white; padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; font-size: 1rem;">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span data-t="velocity_trend">Crowd Velocity Trend</span>
+                </h3>
+                <span style="font-size: 0.65rem; font-weight: 800; background: #eff6ff; color: var(--primary); padding: 4px 12px; border-radius: 20px;" data-t="forecast_badge">24H DYNAMIC FORECAST</span>
+            </div>
+            <div style="height: 300px;">
+                <canvas id="velocityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Intel Feed Component -->
+        <div class="glass-card" style="background: white; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; font-size: 1rem;">
+                    <i class="fa-solid fa-terminal"></i>
+                    <span data-t="intel_feed">Intelligence Feed</span>
+                </h3>
+                <span style="font-family: 'JetBrains Mono'; font-size: 0.65rem; color: #94a3b8;" id="feed-count">SYNCED</span>
+            </div>
+            <div id="telemetry-feed" style="background: #0f172a; border-radius: 12px; padding: 1.5rem; font-family: 'JetBrains Mono', monospace; height: 200px; overflow-y: hidden; border: 1px solid #1e293b; color: #94a3b8;">
+                {% for b in autopilot_logs %}
+                <div style="font-size: 0.7rem; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px;">
+                    <span style="color: #475569;">[{{ b.timestamp.strftime('%H:%M') }}]</span>
+                    <span style="color: #10b981; font-weight: 800;">NEURAL_MATCH</span>
+                    <span>{{ b.records_count }} SVCS</span>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding: 1.25rem; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.7rem; color: #64748b; font-weight: 700;">MODEL PRECISION</span>
+                    <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">94.7%</span>
+                </div>
+                <div style="width: 100%; height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                    <div style="width: 94%; height: 100%; background: var(--primary);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECONDARY INSIGHTS ROW -->
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Demand Distribution -->
+        <div class="glass-card" style="background: white;">
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; font-size: 0.9rem;">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span data-t="demand_dist">Demand Distribution</span>
+                </h3>
+            </div>
+            <div style="height: 220px;">
+                <canvas id="demandChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Pressure Zones -->
+        <div class="glass-card" style="background: white;">
+            <div style="margin-bottom: 1.5rem;">
+                 <h3 style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; font-size: 0.9rem;">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                    <span data-t="crowd_pressure_zones">CROWD PRESSURE ZONES</span>
+                </h3>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 8px;" id="zones-grid">
+                {% for zone in zone_data %}
+                <div class="zone-card" data-zone="{{ zone.name }}" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; border-right: 3px solid {% if zone.val > 4 %}#ef4444{% elif zone.val > 3 %}#f59e0b{% else %}#10b981{% endif %}; transition: all 0.3s ease;">
+                    <div style="font-size: 0.65rem; color: #64748b; font-weight: 700; text-transform: uppercase;" data-t-dynamic="{{ zone.name }}">{{ zone.name|truncate(15) }}</div>
+                    <div class="zone-val" style="font-size: 1.25rem; font-weight: 800; margin-top: 5px; color: var(--primary);">{{ zone.val }} <small style="font-size: 0.6rem; color: #94a3b8;">ช/م²</small></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- PREDICTION MATRIX -->
+    <div class="glass-card" style="background: white; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; font-size: 1rem;">
+                <i class="fa-solid fa-list-check"></i>
+                <span>AI PREDICTION MATRIX</span>
+            </h3>
+            <span class="card-badge" style="background: #eff6ff; color: var(--primary); font-size: 0.65rem; padding: 5px 15px; border-radius: 20px; font-weight: 800;">LIVE STREAM</span>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 2px solid #f1f5f9; color: #64748b;">
+                        <th style="padding: 12px; font-weight: 700;" data-t="location">LOCATION</th>
+                        <th style="padding: 12px; font-weight: 700;" data-t="exp_waiting">EXPECTED</th>
+                        <th style="padding: 12px; font-weight: 700;" data-t="crowd_level">DEMAND</th>
+                        <th style="padding: 12px; font-weight: 700;" data-t="timestamp">TIMESTAMP</th>
+                        <th style="padding: 12px; font-weight: 700;" data-t="status">RESULT</th>
+                    </tr>
+                </thead>
+                <tbody id="pred-tbody">
+                    {% for p in latest_preds %}
+                    <tr style="border-bottom: 1px solid #f8fafc;">
+                        <td style="padding: 12px; font-weight: 600;">{{ p.service.name }}</td>
+                        <td style="padding: 12px; font-family: 'JetBrains Mono'; color: var(--primary);">{{ p.expected_visitors }}</td>
+                        <td style="padding: 12px;" data-t-dynamic="{{ p.demand_level }}">{{ p.demand_level }}</td>
+                        <td style="padding: 12px; color: #94a3b8; font-size: 0.75rem;">{{ p.timestamp.strftime('%H:%M:%S') }}</td>
+                        <td style="padding: 12px;">
+                            <span style="font-size: 0.65rem; padding: 3px 10px; border-radius: 4px; font-weight: 800; background: {% if p.demand_level == 'High' %}#fef2f2; color: #ef4444;{% elif p.demand_level == 'Medium' %}#fffbeb; color: #f59e0b;{% else %}#f0fdf4; color: #10b981;{% endif %}" data-t-dynamic="{{ p.demand_level }}">
+                                {{ p.demand_level|upper }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    #zones-grid::-webkit-scrollbar { width: 6px; }
+    #zones-grid::-webkit-scrollbar-track { background: transparent; }
+    #zones-grid::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.addEventListener('load', function() {
+        if (typeof Chart === 'undefined') return;
+
+        // 1. Velocity Trend Setup
+        const ctxV = document.getElementById('velocityChart').getContext('2d');
+        const gradV = ctxV.createLinearGradient(0, 0, 0, 300);
+        gradV.addColorStop(0, 'rgba(0, 51, 102, 0.1)');
+        gradV.addColorStop(1, 'rgba(0, 51, 102, 0.0)');
+
+        const vChart = new Chart(ctxV, {
+            type: 'line',
+            data: {
+                labels: {{ chart_data.velocity_labels | tojson }},
+                datasets: [{
+                    data: {{ chart_data.velocity_values | tojson }},
+                    borderColor: '#003366',
+                    backgroundColor: gradV,
+                    fill: true,
+                    tension: 0.45,
+                    borderWidth: 3,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                }
+            }
+        });
+
+        // 3. Demand Distribution Setup
+        const rawLabels = {{ chart_data.demand_labels | tojson }};
+        const lang = localStorage.getItem('crowdcast_lang') || 'en';
+        const labelMap = {
+            'en': { 'Low': 'Low', 'Medium': 'Medium', 'High': 'High', 'Critical': 'Critical' },
+            'ar': { 'Low': 'منخفض', 'Medium': 'متوسط', 'High': 'عالي', 'Critical': 'حرج' }
+        };
+        const demandLabels = rawLabels.map(l => labelMap[lang][l] || l);
+
+        const dChart = new Chart(document.getElementById('demandChart'), {
+            type: 'doughnut',
+            data: {
+                labels: demandLabels,
+                datasets: [{
+                    data: {{ chart_data.demand_values | tojson }},
+                    backgroundColor: ['#003366', '#10b981', '#00d4ff', '#ef4444'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                cutout: '75%'
+            }
+        });
+
+        // 4. Neural Link Calibration
+        const socket = io('/admin', {
+            transports: ['polling'],
+            rememberUpgrade: true,
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 20
+        });
+
+        const kpiPreds = document.getElementById('kpi-preds');
+        const feed = document.getElementById('telemetry-feed');
+        const tbody = document.getElementById('pred-tbody');
+        const statusEl = document.getElementById('conn-status');
+
+        socket.on('connect', () => {
+            console.log('S.IOC: NEURAL_LINK_ESTABLISHED');
+            statusEl.innerText = 'SYNCED ●';
+            statusEl.style.color = '#10b981';
+            statusEl.style.background = '#f0fdf4';
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('S.IOC: HANDSHAKE_FAILED', err);
+            statusEl.innerText = 'RETRYING...';
+            statusEl.style.color = '#f59e0b';
+            statusEl.style.background = '#fffbeb';
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.warn('S.IOC: LINK_SEVERED', reason);
+            statusEl.innerText = 'OFFLINE ✕';
+            statusEl.style.color = '#ef4444';
+            statusEl.style.background = '#fef2f2';
+        });
+
+        socket.on('new_prediction', function(data) {
+            // 1. Core KPIs with Flash Effect
+            const flash = (el, val) => {
+                if(!el) return;
+                const old = el.innerText;
+                el.innerText = Number(val).toLocaleString();
+                if(old !== el.innerText) {
+                    el.style.color = '#10b981';
+                    el.style.transform = 'scale(1.1)';
+                    setTimeout(() => { el.style.color = 'inherit'; el.style.transform = 'scale(1)'; }, 400);
+                }
+            };
+            
+            if(data.stats) {
+                flash(kpiPreds, data.stats.predictions);
+                flash(document.getElementById('kpi-visitors'), data.stats.visitors);
+            }
+            
+            // 2. Intelligence Feed
+            if(feed) {
+                const line = document.createElement('div');
+                line.style.fontSize = '0.7rem';
+                line.style.padding = '8px 0';
+                line.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                line.innerHTML = `<span style="color: #475569;">[${new Date().toLocaleTimeString()}]</span> <span style="color: #00d4ff; font-weight: 800;">NEURAL_SYNC</span> <span>MATCHED ${data.new_results.length} SVCS</span>`;
+                feed.prepend(line);
+                if(feed.children.length > 8) feed.lastElementChild.remove();
+            }
+
+            // 3. Pressure Zones Update
+            if(data.zone_data) {
+                const zonesGrid = document.getElementById('zones-grid');
+                zonesGrid.innerHTML = '';
+                data.zone_data.forEach(z => {
+                    let colorCode = '#10b981';
+                    if (z.val > 4) colorCode = '#ef4444';
+                    else if (z.val > 3) colorCode = '#f59e0b';
+
+                    const card = document.createElement('div');
+                    card.className = 'zone-card';
+                    card.setAttribute('data-zone', z.name);
+                    card.style.cssText = `background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 12px; border-right: 3px solid ${colorCode}; transition: all 0.3s ease;`;
+                    
+                    card.innerHTML = `
+                        <div style="font-size: 0.65rem; color: #64748b; font-weight: 700; text-transform: uppercase;" data-t-dynamic="${z.name}">${z.name.substring(0, 20)}</div>
+                        <div class="zone-val" style="font-size: 1.25rem; font-weight: 800; margin-top: 5px; color: var(--primary);">${z.val} <small style="font-size: 0.6rem; color: #94a3b8;">ش/م²</small></div>
+                    `;
+                    zonesGrid.appendChild(card);
+                });
+            }
+
+            // 4. Demand Distribution (Pie Chart)
+            if(data.demand_data) {
+                const levels = ['Low', 'Medium', 'High', 'Critical']; 
+                const newData = levels.map(l => data.demand_data[l] || 0);
+                dChart.data.datasets[0].data = newData;
+                dChart.update('active');
+            }
+
+            // 5. Prediction Matrix & Velocity Chart
+            if(data.new_results.length > 0) {
+                 const res = data.new_results[0];
+                 const row = document.createElement('tr');
+                 row.style.borderBottom = '1px solid #f8fafc';
+                 row.style.background = 'rgba(0, 212, 255, 0.03)';
+                 row.innerHTML = `
+                    <td style="padding: 12px; font-weight: 600;">${res.service_name}</td>
+                    <td style="padding: 12px; font-family: 'JetBrains Mono'; color: var(--primary);">${res.visitors}</td>
+                    <td style="padding: 12px;">${res.level}</td>
+                    <td style="padding: 12px; color: #94a3b8; font-size: 0.75rem;">${new Date().toLocaleTimeString()}</td>
+                    <td style="padding: 12px;">
+                        <span style="font-size: 0.65rem; padding: 3px 10px; border-radius: 4px; font-weight: 800; background: ${res.level === 'High' ? '#fef2f2; color: #ef4444;' : (res.level === 'Medium' ? '#fffbeb; color: #f59e0b;' : '#f0fdf4; color: #10b981;')}">
+                            ${res.level.toUpperCase()}
+                        </span>
+                    </td>
+                 `;
+                 tbody.prepend(row);
+                 if(tbody.children.length > 10) tbody.lastElementChild.remove();
+                 
+                 vChart.data.datasets[0].data.push(res.visitors);
+                 vChart.data.labels.push(new Date().toLocaleTimeString([], {minute:'2-digit', second:'2-digit'}));
+                 if(vChart.data.datasets[0].data.length > 24) {
+                     vChart.data.datasets[0].data.shift();
+                     vChart.data.labels.shift();
+                 }
+                 vChart.update('none');
+            }
+        });
+    });
+</script>
+{% endblock %}

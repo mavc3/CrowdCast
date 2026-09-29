@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdCast 2034 | Neural Auditor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body id="body-root">
+    <div class="admin-layout">
+        <aside class="sidebar" style="background: #050a10;">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CrowdCast Logo" style="height: 56px; margin-inline-end: 10px;">
+                <span data-t="hero_title">CROWDCAST</span>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('developer.dashboard') }}"><i class="fa-solid fa-house-chimney-medical"></i> <span data-t="nav_dash">Control Center</span></a></li>
+                <li><a href="{{ url_for('developer.data_management') }}"><i class="fa-solid fa-database"></i> <span data-t="nav_data">Data Warehouse</span></a></li>
+                <li><a href="{{ url_for('developer.model_management') }}"><i class="fa-solid fa-box-open"></i> <span data-t="nav_models">Model Registry</span></a></li>
+                <li><a href="{{ url_for('developer.prediction_engine') }}"><i class="fa-solid fa-vial-virus"></i> <span data-t="nav_engine">Inference Engine</span></a></li>
+                <li><a href="{{ url_for('developer.model_evaluation') }}"><i class="fa-solid fa-chart-line"></i> <span data-t="nav_eval">Performance Evaluation</span></a></li>
+                <li><a href="{{ url_for('developer.system_monitor') }}"><i class="fa-solid fa-stethoscope"></i> <span data-t="nav_monitor">System Health</span></a></li>
+                <li><a href="{{ url_for('developer.logs') }}"><i class="fa-solid fa-scroll-old"></i> <span data-t="nav_logs">Audit Logs</span></a></li>
+                
+                <li style="margin-top: auto; padding-top: 2rem;">
+                    <a href="{{ url_for('auth.logout') }}" style="color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2);">
+                        <i class="fa-solid fa-power-off"></i> <span data-t="logout">Terminate Session</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content" style="background: #fcfdfe;">
+            <header class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; margin-bottom: 2rem; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #6366f1;">
+                <h2 id="page-title" style="margin: 0; font-weight: 800; color: #050a10;" data-t="dev_portal">Neural Auditor Console</h2>
+                <div style="display: flex; gap: 1.5rem; align-items: center;">
+                    <button onclick="toggleLanguage()" class="btn-lang-switch" style="background: #f1f5f9;">
+                        <i class="fa-solid fa-language"></i> <span id="lang-label">عربي</span>
+                    </button>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 5px 15px; background: rgba(99, 102, 241, 0.05); border-radius: 30px;">
+                        <div style="text-align: inherit;">
+                            <div style="font-weight: 700; font-size: 0.9rem;">{{ current_user.name }}</div>
+                            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase; color: #6366f1;" data-t-dynamic="{{ current_user.role }}">{{ current_user.role }}</div>
+                        </div>
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
+                            {{ current_user.name[0] | upper }}
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="glass-card animate-entrance" style="background: rgba(255,255,255,0.95); border-inline-start: 5px solid #6366f1; padding: 1.25rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                            <i class="fa-solid fa-circle-info" style="margin-inline-end: 10px; color: #6366f1;"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block staff_content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

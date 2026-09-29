@@ -1,0 +1,141 @@
+{% extends "staff/staff_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance">
+    <!-- Analysis Controls -->
+    <div class="glass-card" style="padding: 1.5rem 2.5rem; margin-bottom: 2rem;">
+        <form action="{{ url_for('staff.prediction_viewer') }}" method="GET" style="display: flex; gap: 1.5rem; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="filter_stadium">Venue Scope</label>
+                <select name="stadium_id" style="margin: 0;">
+                    <option value="">All Venues</option>
+                    {% for stadium in stadiums %}
+                    <option value="{{ stadium.id }}" {% if request.args.get('stadium_id') == stadium.id|string %}selected{% endif %}>{{ stadium.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;" data-t="filter_service">Operational Unit</label>
+                <select name="service_id" style="margin: 0;">
+                    <option value="">All Services</option>
+                    {% for service in services %}
+                    <option value="{{ service.id }}" {% if request.args.get('service_id') == service.id|string %}selected{% endif %}>{{ service.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 50px; padding: 0 2rem;">
+                <i class="fa-solid fa-filter"></i> <span data-t="btn_filter">Apply Analytics Filter</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Prediction Stream -->
+    <div class="glass-card" style="padding: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h3 style="font-weight: 800; margin: 0;" data-t="prediction_stream">Analytical Prediction Stream</h3>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span style="font-size: 0.7rem; font-weight: 800; color: #10b981;"><i class="fa-solid fa-circle-check"></i> MODEL: NEURAL-LINK v5.2</span>
+                <span style="font-size: 0.7rem; font-weight: 800; color: var(--accent);"><i class="fa-solid fa-rotate"></i> REAL-TIME SYNC</span>
+            </div>
+        </div>
+        
+        <table id="predictions-table">
+            <thead>
+                <tr>
+                    <th data-t="stadium">Venue</th>
+                    <th data-t="service_name">Service Unit</th>
+                    <th data-t="crowd_level">Predicted Demand</th>
+                    <th data-t="exp_waiting">Expected Wait</th>
+                    <th data-t="timestamp">Sync Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                <tr>
+                    <td style="font-weight: 700;">{{ pred.service.stadium.name }}</td>
+                    <td>{{ pred.service.name }}</td>
+                    <td>
+                        {% set color = '#10b981' %}
+                        {% if pred.demand_level == 'High' or pred.demand_level == 'Critical' %}{% set color = '#ff4d4d' %}
+                        {% elif pred.demand_level == 'Medium' %}{% set color = '#f59e0b' %}{% endif %}
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 10px; height: 10px; border-radius: 50%; background: {{ color }};"></div>
+                            <span style="font-weight: 800; color: {{ color }};" data-t-dynamic="{{ pred.demand_level }}">{{ pred.demand_level }}</span>
+                        </div>
+                    </td>
+                    <td style="font-weight: 800;">{{ pred.waiting_time }} MIN</td>
+                    <td style="font-size: 0.8rem; opacity: 0.6;">{{ pred.timestamp.strftime('%H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+                {% if not predictions %}
+                <tr id="no-data-row">
+                    <td colspan="5" style="text-align: center; padding: 4rem; opacity: 0.5;">
+                        <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p data-t="no_data">No predictive telemetry available for current filter.</p>
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof io !== 'undefined') {
+        const socket = io('/admin', {
+            transports: ['polling'],
+            rememberUpgrade: true,
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 20
+        });
+
+        socket.on('new_prediction', function(data) {
+            if (data.new_results && data.new_results.length > 0) {
+                const tbody = document.querySelector('#predictions-table tbody');
+                const noDataRow = document.getElementById('no-data-row');
+                if (noDataRow) noDataRow.remove();
+
+                const lang = localStorage.getItem('crowdcast_lang') || 'en';
+                const labelMap = {
+                    'en': { 'Low': 'Low', 'Medium': 'Medium', 'High': 'High', 'Critical': 'Critical' },
+                    'ar': { 'Low': 'منخفض', 'Medium': 'متوسط', 'High': 'عالي', 'Critical': 'حرج' }
+                };
+
+                // Add new rows at the top
+                data.new_results.forEach(pred => {
+                    let color = '#10b981';
+                    if (pred.level === 'High' || pred.level === 'Critical') color = '#ff4d4d';
+                    else if (pred.level === 'Medium') color = '#f59e0b';
+                    
+                    const localizedLevel = labelMap[lang][pred.level] || pred.level;
+
+                    const tr = document.createElement('tr');
+                    tr.style.animation = 'pulse 1s ease';
+                    tr.innerHTML = `
+                        <td style="font-weight: 700;">${pred.stadium_name || '-'}</td>
+                        <td>${pred.service_name}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: ${color};"></div>
+                                <span style="font-weight: 800; color: ${color};" data-t-dynamic="${pred.level}">${localizedLevel}</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 800;">15 MIN</td>
+                        <td style="font-size: 0.8rem; opacity: 0.6;">${pred.time}</td>
+                    `;
+                    tbody.insertBefore(tr, tbody.firstChild);
+                });
+
+                // Keep only top 50 rows
+                while (tbody.children.length > 50) {
+                    tbody.removeChild(tbody.lastChild);
+                }
+            }
+        });
+    }
+});
+</script>
+</div>
+{% endblock %}

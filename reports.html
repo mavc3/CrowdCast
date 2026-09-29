@@ -1,0 +1,123 @@
+{% extends "admin/base.html" %}
+
+{% block admin_content %}
+<div style="padding: 2rem 0; max-width: 100%; overflow-x: hidden;">
+    <!-- Reports Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+        <div>
+            <h1 style="font-weight: 800; font-size: 1.8rem; color: var(--primary);" data-t="nav_reports">Operational Intelligence Reports</h1>
+            <p style="color: #64748b; font-size: 0.9rem;">Comprehensive analysis of venue utilization and AI prediction trends.</p>
+        </div>
+        <div style="background: var(--secondary); color: var(--primary); padding: 8px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 800;">
+            <i class="fa-solid fa-calendar-check" style="margin-right: 8px;"></i>
+            AUTOPILOT: ACTIVE
+        </div>
+    </div>
+
+    <!-- Top Analysis Grid -->
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-chart-line"></i>
+                <span data-t="nav_stadiums">Venue Utilization Comparison</span>
+            </h3>
+            <div style="height: 300px; position: relative;">
+                {% if data.stadium_labels %}
+                <canvas id="stadiumChart"></canvas>
+                {% else %}
+                <div style="height: 100%; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 0.8rem;">No sufficient data for comparison.</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span data-t="category">Demand Level Distribution</span>
+            </h3>
+            <div style="height: 300px; position: relative;">
+                {% if data.demand_labels %}
+                <canvas id="demandChart"></canvas>
+                {% else %}
+                <div style="height: 100%; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 0.8rem;">No trace data detected.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+        <div class="glass-card" style="text-align: center; border-bottom: 3px solid var(--primary); padding: 2rem;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;" data-t="accuracy">Model Precision Index</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-top: 10px;">94.2%</div>
+        </div>
+        <div class="glass-card" style="text-align: center; border-bottom: 3px solid #10b981; padding: 2rem;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;" data-t="total_predictions">Predicted Global Demand</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: #10b981; margin-top: 10px;">{{ data.total_visitors }}</div>
+        </div>
+        <div class="glass-card" style="text-align: center; border-bottom: 3px solid var(--accent); padding: 2rem;">
+            <div style="font-size: 0.65rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;" data-t="rec_count">Global Traces Analyzed</div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent); margin-top: 10px;">{{ data.total_count }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('nav-reports').classList.add('active');
+        document.getElementById('page-title').innerText = "Intelligence Center";
+
+        const stadiumCtx = document.getElementById('stadiumChart');
+        if (stadiumCtx) {
+            new Chart(stadiumCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ data.stadium_labels|tojson|safe }},
+                    datasets: [{
+                        label: 'Capacity Flow',
+                        data: {{ data.stadium_values|tojson|safe }},
+                        backgroundColor: 'rgba(0, 51, 102, 0.7)',
+                        borderColor: '#003366',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } },
+                        x: { grid: { display: false }, border: { display: false } }
+                    }
+                }
+            });
+        }
+
+        const demandCtx = document.getElementById('demandChart');
+        if (demandCtx) {
+            new Chart(demandCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ data.demand_labels|tojson|safe }},
+                    datasets: [{
+                        data: {{ data.demand_values|tojson|safe }},
+                        backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#003366'],
+                        borderWidth: 5,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { weight: '700' } } } },
+                    cutout: '70%'
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

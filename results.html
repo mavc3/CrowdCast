@@ -1,0 +1,51 @@
+{% extends "visitor/visitor_base.html" %}
+{% block visitor_content %}
+<div class="animate-entrance">
+    <div class="glass-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; background: white; padding: 1.5rem 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <div>
+            <h1 style="font-weight: 800; font-size: 1.75rem; color: var(--primary); margin: 0;" data-t="results_title">Predictive Intelligence Results</h1>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.25rem;" data-t="sys_live">Neural Link Active - Transmission in progress.</p>
+        </div>
+        <a href="{{ url_for('visitor.dashboard') }}" class="btn btn-secondary" style="border-radius: 12px; font-weight: 700;">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span data-t="btn_search">Search Again</span>
+        </a>
+    </div>
+
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 24px; text-align: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto;">
+        
+        {% set level_color = '#10b981' if level == 'Low' else ('#f59e0b' if level == 'Medium' else ('#9f1239' if level == 'Critical' else '#ef4444')) %}
+        
+        <div style="background: {{ level_color }}; color: white; padding: 3rem 2rem;">
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; border: 2px solid white;">
+                    <i class="fa-solid fa-users" style="font-size: 2rem; color: white;"></i>
+                </div>
+            </div>
+            <h2 style="font-weight: 800; font-size: 3.5rem; margin: 0; line-height: 1;">{{ visitors }}</h2>
+            <div style="font-weight: 700; opacity: 0.9; text-transform: uppercase; font-size: 1rem; margin-top: 0.5rem;" data-t="expected_visitors">Expected Visitors</div>
+            <div style="display: inline-block; padding: 6px 20px; border-radius: 20px; background: white; color: {{ level_color }}; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 0.85rem; margin-top: 1.5rem;" data-t-dynamic="{{ level }}">
+                {{ level }}
+            </div>
+        </div>
+
+        <div style="padding: 3rem;">
+            <p style="color: #475569; font-size: 1.2rem; line-height: 1.6; margin: 0 auto 2.5rem;">
+                <span data-t="destination">Destination</span>: <strong style="color: var(--primary);">{{ service.name }}</strong> <span data-t="at">at</span> <strong style="color: var(--primary);">{{ stadium.name }}</strong><br>
+                <span style="font-size: 1rem; color: #94a3b8; font-weight: 600; font-family: 'JetBrains Mono';">{{ date }} | {{ "%02d" | format(hour) }}:00</span>
+            </p>
+
+            <div style="padding: 1.5rem; background: #f8fafc; border-left: 4px solid var(--primary); border-radius: 12px; text-align: left; margin: 0 auto;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
+                    <i class="fa-solid fa-lightbulb" style="color: var(--primary); font-size: 1.2rem;"></i>
+                    <span style="font-weight: 800; color: var(--primary); font-size: 1.1rem;" data-t="recommendation_title">Smart Recommendation</span>
+                </div>
+                <p style="color: #334155; font-weight: 600; margin: 0; font-size: 1rem; line-height: 1.5;" 
+                   data-t-key="{{ 'rec_optimal' if is_optimal else 'rec_better_time' }}" 
+                   data-t-params='{"hour": "{{ "%02d" | format(best_hour) }}", "visitors": "{{ min_visitors }}"}'>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

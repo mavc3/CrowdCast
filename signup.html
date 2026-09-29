@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="animate-entrance" style="min-height: calc(100vh - 120px); display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="glass-portal" style="width: 100%; max-width: 480px; padding: 4rem; background: white; border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 40px 100px rgba(0,0,0,0.05);">
+        
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <div style="width: 72px; height: 72px; background: rgba(0, 51, 102, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i class="fa-solid fa-microchip" style="font-size: 1.5rem; color: var(--primary);"></i>
+            </div>
+            <h2 style="font-weight: 800; font-size: 1.75rem; color: var(--primary); letter-spacing: -0.5px;" data-t="signup_dev_title">Developer Onboarding</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;" data-t="signup_dev_desc">Connect to the core neural architecture and govern the models.</p>
+        </div>
+
+        <form method="POST">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;" data-t="username">Full Name</label>
+                <input type="text" name="name" data-t="p_name" placeholder="Developer Name" required minlength="3" style="margin: 0; width: 100%; height: 54px; padding: 0 1.25rem; border: 1px solid var(--border); border-radius: 12px; font-weight: 600; background: #f8fafc;">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;" data-t="label_email">Email Address</label>
+                <input type="email" name="email" data-t="email" placeholder="dev@crowdcast.com" required style="margin: 0; width: 100%; height: 54px; padding: 0 1.25rem; border: 1px solid var(--border); border-radius: 12px; font-weight: 600; background: #f8fafc;">
+            </div>
+            
+            <div style="margin-bottom: 2.5rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;" data-t="label_pass">Access Password</label>
+                <input type="password" name="password" data-t="password" placeholder="••••••••" required minlength="8" pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\W_]{8,}" title="Password must be at least 8 characters long and contain both letters and numbers" style="margin: 0; width: 100%; height: 54px; padding: 0 1.25rem; border: 1px solid var(--border); border-radius: 12px; font-weight: 600; background: #f8fafc;">
+                <small style="display: block; margin-top: 8px; color: #94a3b8; font-size: 0.75rem;" data-t="password_hint">Must be at least 8 characters long and contain both letters and numbers.</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 60px; justify-content: center; font-size: 1.1rem; border-radius: 14px; background: var(--grad-primary); box-shadow: 0 10px 30px rgba(0, 51, 102, 0.15);">
+                <span data-t="btn_signup">Register Account</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <div style="margin-top: 2.5rem; padding-top: 2.5rem; border-top: 1px solid #f1f5f9; text-align: center;">
+            <p style="font-size: 0.85rem; color: #94a3b8;"><span data-t="have_account">Already enrolled?</span> <a href="{{ url_for('auth.login') }}" style="color: var(--primary); font-weight: 700; text-decoration: none;" data-t="login_gateway">Access Gateway</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

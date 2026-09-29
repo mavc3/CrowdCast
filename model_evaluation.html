@@ -1,0 +1,72 @@
+{% extends "dev/dev_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance">
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- Predictive Performance Chart -->
+        <div class="glass-card" style="padding: 2.5rem;">
+            <h3 style="font-weight: 800; margin-bottom: 2rem;" data-t="nav_eval">Performance Evaluation</h3>
+            <canvas id="evalChart" style="width: 100%; height: 350px;"></canvas>
+        </div>
+
+        <!-- Accuracy Metrics -->
+        <div class="glass-card" style="padding: 2.5rem;">
+            <h3 style="font-weight: 800; margin-bottom: 2.5rem;" data-t="accuracy_metrics">Operational Metrics</h3>
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <div style="border-inline-start: 4px solid #6366f1; padding-inline-start: 1rem;">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">MAE (Mean Absolute Error)</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #050a10;">12.4 <span style="font-size: 0.8rem; opacity: 0.4;">VISITORS</span></div>
+                </div>
+                <div style="border-inline-start: 4px solid #a855f7; padding-inline-start: 1rem;">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Model Accuracy</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #10b981;">94.2%</div>
+                </div>
+                <div style="border-inline-start: 4px solid var(--accent); padding-inline-start: 1rem;">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Confidence Interval</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #050a10;">±3%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('evalChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_data.labels|tojson }},
+        datasets: [{
+            label: 'Actual Visitors',
+            data: {{ chart_data.actual|tojson }},
+            borderColor: '#64748b',
+            backgroundColor: 'rgba(100, 116, 139, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        }, {
+            label: 'Predicted Visitors',
+            data: {{ chart_data.predicted|tojson }},
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            pointBackgroundColor: '#6366f1',
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top', labels: { font: { weight: '800', family: 'Inter' } } }
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+</script>
+{% endblock %}

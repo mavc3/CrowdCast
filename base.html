@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdCast 2034 | Enterprise Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body id="body-root">
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CrowdCast Logo" style="height: 56px; margin-inline-end: 10px;">
+                <span data-t="hero_title">CROWDCAST</span>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('admin.dashboard') }}" id="nav-dashboard"><i class="fa-solid fa-gauge-high"></i> <span data-t="nav_dash">Dashboard</span></a></li>
+                <li><a href="{{ url_for('admin.user_management') }}" id="nav-users"><i class="fa-solid fa-users-gear"></i> <span data-t="nav_users">Users Management</span></a></li>
+                <li><a href="{{ url_for('admin.stadiums_services') }}" id="nav-stadiums-services"><i class="fa-solid fa-building-circle-check"></i> <span data-t="nav_stadiums_services">Stadiums & Services</span></a></li>
+                <li><a href="{{ url_for('admin.prediction_hub') }}" id="nav-prediction"><i class="fa-solid fa-microchip"></i> <span data-t="nav_prediction_hub">Prediction Management</span></a></li>
+                <li><a href="{{ url_for('admin.reports_page') }}" id="nav-reports"><i class="fa-solid fa-file-invoice"></i> <span data-t="nav_reports">Operational Reports</span></a></li>
+                <li><a href="{{ url_for('admin.system_logs') }}" id="nav-logs"><i class="fa-solid fa-terminal"></i> <span data-t="nav_logs">Audit Logs</span></a></li>
+                <li style="margin-top: auto; padding-top: 2rem;">
+                    <a href="{{ url_for('auth.logout') }}" style="color: #ff4d4d;">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span data-t="logout">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; margin-bottom: 2rem; position: sticky; top: 0; z-index: 100;">
+                <h2 id="page-title" style="margin: 0; font-weight: 800;" data-t="dashboard">Analytics Center</h2>
+                <div style="display: flex; gap: 1.5rem; align-items: center;">
+                    <button onclick="toggleLanguage()" class="btn-lang-switch">
+                        <i class="fa-solid fa-language"></i> <span id="lang-label">عربي</span>
+                    </button>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="text-align: inherit;">
+                            <div style="font-weight: 700; font-size: 0.9rem;">{{ current_user.name }}</div>
+                            <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase;" data-t-dynamic="{{ current_user.role }}">{{ current_user.role }}</div>
+                        </div>
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">
+                            {{ current_user.name[0] | upper }}
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            {% block admin_content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

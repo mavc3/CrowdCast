@@ -1,0 +1,72 @@
+{% extends "dev/dev_base.html" %}
+{% block staff_content %}
+<div class="animate-entrance">
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <!-- Warehouse Registry -->
+        <div class="glass-card" style="padding: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h3 style="font-weight: 800; margin: 0;" data-t="nav_data">Data Warehouse</h3>
+                <span style="font-size: 0.75rem; font-weight: 800; opacity: 0.4;">TICKET_SALES_RECORDS: {{ sales|length }}</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th data-t="st_name">Service</th>
+                        <th data-t="timestamp">Date</th>
+                        <th data-t="hour">Hour</th>
+                        <th data-t="visitor_count">Visitors</th>
+                        <th data-t="ticket_count">Tickets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td style="font-weight: 700;">{{ sale.service.name }}</td>
+                        <td>{{ sale.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ sale.hour }}:00</td>
+                        <td style="font-weight: 800; color: var(--primary);">{{ sale.visitor_count }}</td>
+                        <td>{{ sale.ticket_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Ingestion Hub -->
+        <div class="glass-card" style="padding: 2.5rem; height: fit-content; position: sticky; top: 120px;">
+            <h3 style="font-weight: 800; margin-bottom: 2rem;" data-t="telemetry_ingestion">Manual Ingestion</h3>
+            <form action="{{ url_for('developer.add_data') }}" method="POST">
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;">Service Node</label>
+                    <select name="service_id" required>
+                        {% for s in services %}
+                        <option value="{{ s.id }}">{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;">Operational Date</label>
+                    <input type="date" name="date" required value="{{ date_today }}">
+                </div>
+                <div style="margin-bottom: 1.2rem;">
+                    <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;">Temporal Hour (0-23)</label>
+                    <input type="number" name="hour" min="0" max="23" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem;">
+                    <div>
+                        <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;">Visitors</label>
+                        <input type="number" name="visitor_count" required>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.7rem; font-weight: 800; color: #64748b; margin-bottom: 6px; text-transform: uppercase;">Tickets</label>
+                        <input type="number" name="ticket_count" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; justify-content: center; background: #6366f1;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span data-t="btn_ingest">Ingest Record</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
